@@ -72,3 +72,9 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/t
 
 ### Adding sass to create-react-app
 Link [https://www.better.dev/adding-sass-to-create-react-app]
+
+## Mozilla postMessage
+https://developer.mozilla.org/en-US/docs/Web/API/Window/postMessage
+
+## Resource Performance Timing
+https://siusin.github.io/perf-timing-primer/

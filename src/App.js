@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useReducer } from "react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -6,8 +6,9 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Link from "@mui/material/Link";
 import Navigator from "./components/Navigator";
-import Content from "./components/Content";
 import Header from "./components/Header";
+import Console from "./components/Console";
+import { consoleReducer } from "./store/console";
 import "./App.scss";
 
 let theme = createTheme({
@@ -155,47 +156,91 @@ theme = {
 
 const drawerWidth = 256;
 
+// ensure the target is ready to listen to messages
+let waitForTarget;
+// prevent React rendering from adding multiple listeners
+let windowListenerInitialized = false;
+
 function App() {
-  const [mobileOpen, setMobileOpen] = React.useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [tabValue, setTabValue] = useState("console");
+  const [targetURL, setTargetURL] = useState(false);
+  const [consoleLogState, consoleDispatch] = useReducer(consoleReducer, []);
+
   const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
+  const handleTabChange = (value) => setTabValue(value);
+  const handleLaunch = (url) => {
+    setTargetURL(url);
+    const target = window.open(url);
+
+    const waitForTarget = setInterval(() => {
+      if (target && target.window)
+        target.window.postMessage({ init: true }, "*");
+    }, 1000);
+
+    if (!windowListenerInitialized) {
+      window.addEventListener("message", (event) => {
+        const { data } = event;
+
+        if (data.type === "init" && data.message === "SUCCESS") {
+          clearInterval(waitForTarget);
+          console.log("Target Window Initialized");
+          // tell the target to log FETCH API traffic - configurable in future version
+          if (target.window)
+            target.window.postMessage({ options: ["payload"] }, "*");
+        } else if (data.type) {
+          console.log("Message Type", data.type);
+          console.log("Message", data.message);
+          const payload = {
+            id: `${data.timestamp}-${Math.floor(Math.random() * 1000)}`,
+            timestamp: data.timestamp,
+            data: data.message,
+          };
+          switch (data.type) {
+            case "console":
+              consoleDispatch({ type: "ADD_LOG", payload });
+              break;
+
+            default:
+              break;
+          }
+        }
+      });
+      windowListenerInitialized = true;
+    }
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <Box sx={{ display: "flex", minHeight: "100vh" }}>
         <CssBaseline />
-        <Box
-          component="nav"
-          sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
-        >
-          {isSmUp ? null : (
-            <Navigator
-              PaperProps={{ style: { width: drawerWidth } }}
-              variant="temporary"
-              open={mobileOpen}
-              onClose={handleDrawerToggle}
-            />
-          )}
-
-          <Navigator
-            PaperProps={{ style: { width: drawerWidth } }}
-            sx={{ display: { sm: "block", xs: "none" } }}
-          />
-        </Box>
+       
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
-          <Header onDrawerToggle={handleDrawerToggle} />
+          <Header
+            onDrawerToggle={handleDrawerToggle}
+            onTabChange={handleTabChange}
+            onLaunch={handleLaunch}
+            selectedTab={tabValue}
+          />
           <Box
             component="main"
             sx={{ flex: 1, py: 6, px: 4, bgcolor: "#eaeff1" }}
           >
-            <Content />
+            {tabValue === "console" && (
+              <Console
+                data={consoleLogState}
+                handleClearData={() => consoleDispatch({ type: "RESET_LOG" })}
+              />
+            )}
+            {tabValue === "network" && <div> network placeholder </div>}
+            
           </Box>
           <Box component="footer" sx={{ p: 2, bgcolor: "#eaeff1" }} />
-           
-          
         </Box>
       </Box>
     </ThemeProvider>

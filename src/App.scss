@@ -1,0 +1,5 @@
+// Remove the white background when input fields are populated using autocomplete from the browser
+// https://stackoverflow.com/a/64166144/15562402
+input {
+    -webkit-background-clip: text !important;
+  }
