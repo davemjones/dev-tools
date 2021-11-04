@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import {
   DataGrid,
-  GridToolbar,
   GridToolbarContainer,
   GridToolbarColumnsButton,
   GridToolbarFilterButton,
@@ -9,7 +8,6 @@ import {
   GridToolbarExport,
 } from "@mui/x-data-grid";
 import ClearAllIcon from "@mui/icons-material/ClearAll";
-import { ReadMore } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import DetailsDialog from "./DetailsDialog";
 

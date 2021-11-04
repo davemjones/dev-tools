@@ -1,11 +1,7 @@
 import React, { useState, useReducer } from "react";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-import useMediaQuery from "@mui/material/useMediaQuery";
 import CssBaseline from "@mui/material/CssBaseline";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import Link from "@mui/material/Link";
-import Navigator from "./components/Navigator";
 import Header from "./components/Header";
 import Console from "./components/Console";
 import { consoleReducer } from "./store/console";
@@ -154,20 +150,13 @@ theme = {
   },
 };
 
-const drawerWidth = 256;
-
-// ensure the target is ready to listen to messages
-let waitForTarget;
 // prevent React rendering from adding multiple listeners
 let windowListenerInitialized = false;
 
 function App() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tabValue, setTabValue] = useState("console");
-  const [targetURL, setTargetURL] = useState(false);
   const [consoleLogState, consoleDispatch] = useReducer(consoleReducer, []);
-
-  const isSmUp = useMediaQuery(theme.breakpoints.up("sm"));
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -175,7 +164,6 @@ function App() {
 
   const handleTabChange = (value) => setTabValue(value);
   const handleLaunch = (url) => {
-    setTargetURL(url);
     const target = window.open(url);
 
     const waitForTarget = setInterval(() => {
@@ -219,7 +207,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <Box sx={{ display: "flex", minHeight: "100vh" }}>
         <CssBaseline />
-       
+
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column" }}>
           <Header
             onDrawerToggle={handleDrawerToggle}
@@ -238,7 +226,6 @@ function App() {
               />
             )}
             {tabValue === "network" && <div> network placeholder </div>}
-            
           </Box>
           <Box component="footer" sx={{ p: 2, bgcolor: "#eaeff1" }} />
         </Box>
