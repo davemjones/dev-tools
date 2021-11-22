@@ -9,9 +9,35 @@ import {
 } from "@mui/x-data-grid";
 import ClearAllIcon from "@mui/icons-material/ClearAll";
 import { Button } from "@mui/material";
+import { createTheme } from "@mui/material/styles";
+import { makeStyles } from "@mui/styles";
 import DetailsDialog from "./DetailsDialog";
 
+const defaultTheme = createTheme();
+const useStyles = makeStyles(
+  (theme) => ({
+    root: {
+      "& .data-muiDataGrid-console-log": {
+        backgroundColor: "azure",
+      },
+      "& .data-muiDataGrid-console-warn": {
+        backgroundColor: "#eda624",
+      },
+      "& .data-muiDataGrid-console-error": {
+        backgroundColor: "#6a0000",
+        color: 'azure',
+        '&:hover': {
+          backgroundColor: 'lightgray',
+          color: "#6a0000"
+        }
+      },
+    },
+  }),
+  { defaultTheme }
+);
+
 const columns = [
+  { field: "type", headerName: "Type" },
   {
     field: "timestamp",
     headerName: "Timestamp",
@@ -45,10 +71,12 @@ const Console = (props) => {
       <GridToolBarClear />
     </GridToolbarContainer>
   );
+  const classes = useStyles();
 
   return (
     <>
       <DataGrid
+        className={classes.root}
         rows={data}
         density="compact"
         columns={columns}
@@ -64,6 +92,11 @@ const Console = (props) => {
         components={{
           Toolbar: ConsoleToolBar,
         }}
+        getRowClassName={(params) =>
+          `data-muiDataGrid-console-${
+            params.row.type ? params.row.type : "default"
+          }`
+        }
       />
       <DetailsDialog
         handleClose={() => setOpenDialog(false)}

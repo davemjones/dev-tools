@@ -157,6 +157,7 @@ function App() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [tabValue, setTabValue] = useState("console");
   const [consoleLogState, consoleDispatch] = useReducer(consoleReducer, []);
+  const [target, setTarget] = useState(undefined);
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -164,7 +165,7 @@ function App() {
 
   const handleTabChange = (value) => setTabValue(value);
   const handleLaunch = (url) => {
-    const target = window.open(url);
+    setTarget(window.open(url));
 
     const waitForTarget = setInterval(() => {
       if (target && target.window)
@@ -177,29 +178,47 @@ function App() {
 
         if (data.type === "init" && data.message === "SUCCESS") {
           clearInterval(waitForTarget);
-          console.log("Target Window Initialized");
+
+          // Network traffic monitor feature - next release
           // tell the target to log FETCH API traffic - configurable in future version
-          if (target.window)
-            target.window.postMessage({ options: ["payload"] }, "*");
+          // if (target.window)
+          //   target.window.postMessage({ options: ["payload"] }, "*");
         } else if (data.type) {
-          console.log("Message Type", data.type);
-          console.log("Message", data.message);
           const payload = {
             id: `${data.timestamp}-${Math.floor(Math.random() * 1000)}`,
             timestamp: data.timestamp,
             data: data.message,
+            type: data.meta ? data.meta.type : undefined,
           };
           switch (data.type) {
             case "console":
               consoleDispatch({ type: "ADD_LOG", payload });
               break;
-
+            case "heartbeat":
+              consoleDispatch({ type: "HEARTBEAT", payload });
+              break;
             default:
               break;
           }
         }
       });
       windowListenerInitialized = true;
+    }
+  };
+
+  const handleHeartbeat = () => {
+    if (target && target.window) {
+
+      target.window.postMessage({ heartbeat: true }, "*");
+      consoleDispatch({
+        type: "HEARTBEAT",
+        payload: { data: ["Heartbeat Sent"], timestamp: Date.now() },
+      });
+    } else {
+      consoleDispatch({
+        type: "HEARTBEAT",
+        payload: { data: ["No target found"] },
+      });
     }
   };
 
@@ -214,6 +233,7 @@ function App() {
             onTabChange={handleTabChange}
             onLaunch={handleLaunch}
             selectedTab={tabValue}
+            onHeartbeat={handleHeartbeat}
           />
           <Box
             component="main"
@@ -225,7 +245,7 @@ function App() {
                 handleClearData={() => consoleDispatch({ type: "RESET_LOG" })}
               />
             )}
-            {tabValue === "network" && <div> network placeholder </div>}
+            {/* {tabValue === "network" && <div> network placeholder </div>} */}
           </Box>
           <Box component="footer" sx={{ p: 2, bgcolor: "#eaeff1" }} />
         </Box>

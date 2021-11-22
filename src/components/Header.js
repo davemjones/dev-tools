@@ -13,10 +13,9 @@ import Toolbar from "@mui/material/Toolbar";
 const lightColor = "rgba(255, 255, 255, 0.7)";
 
 function Header(props) {
-  const { onDrawerToggle, onTabChange, selectedTab, onLaunch } = props;
-
+  const { onDrawerToggle, onTabChange, selectedTab, onLaunch, onHeartbeat } =
+    props;
   const [url, setUrl] = React.useState();
-
   const handleURLChange = (event) => {
     setUrl(event.target.value);
   };
@@ -72,7 +71,12 @@ function Header(props) {
         component="div"
         position="static"
         elevation={0}
-        sx={{ zIndex: 0 }}
+        sx={{
+          zIndex: 0,
+          display: "flex",
+          flexDirection: "row",
+          justifyContent: "space-between",
+        }}
       >
         <Tabs
           value={selectedTab}
@@ -80,8 +84,17 @@ function Header(props) {
           onChange={(e, value) => onTabChange(value)}
         >
           <Tab label="Console" value="console" />
-          <Tab label="Network Timing" value="network" />
+          {/* Future feature */}
+          {/* <Tab label="Network Timing" value="network" /> */}
         </Tabs>
+        <Button
+          size="small"
+          color="inherit"
+          sx={{ marginRight: "20px" }}
+          onClick={onHeartbeat}
+        >
+          Check Connection
+        </Button>
       </AppBar>
     </React.Fragment>
   );
@@ -90,6 +103,7 @@ function Header(props) {
 Header.propTypes = {
   onDrawerToggle: PropTypes.func.isRequired,
   onTabChange: PropTypes.func.isRequired,
+  onHeartbeat: PropTypes.func,
 };
 
 export default Header;
