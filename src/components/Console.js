@@ -8,7 +8,10 @@ import {
   GridToolbarExport,
 } from "@mui/x-data-grid";
 import ClearAllIcon from "@mui/icons-material/ClearAll";
-import { Button } from "@mui/material";
+import Button from "@mui/material/Button";
+import FormGroup from "@mui/material/FormGroup";
+import FormControlLabel from "@mui/material/FormControlLabel";
+import Switch from "@mui/material/Switch";
 import { createTheme } from "@mui/material/styles";
 import { makeStyles } from "@mui/styles";
 import DetailsDialog from "./DetailsDialog";
@@ -21,15 +24,23 @@ const useStyles = makeStyles(
         backgroundColor: "azure",
       },
       "& .data-muiDataGrid-console-warn": {
-        backgroundColor: "#eda624",
+        backgroundColor: ({ colorized }) => (colorized ? "#eda624" : "inherit"),
       },
       "& .data-muiDataGrid-console-error": {
-        backgroundColor: "#6a0000",
-        color: 'azure',
-        '&:hover': {
-          backgroundColor: 'lightgray',
-          color: "#6a0000"
-        }
+        backgroundColor: ({ colorized }) => (colorized ? "#6a0000" : "inherit"),
+        color: ({ colorized }) => (colorized ? "azure" : "inherit"),
+        "&:hover": {
+          backgroundColor: ({ colorized }) =>
+            colorized ? "lightgray" : "inherit",
+          color: ({ colorized }) => (colorized ? "#6a0000" : "inherit"),
+        },
+      },
+      "& .MuiFormGroup-root": {
+        padding: "4px 10px",
+      },
+      "& .MuiFormControlLabel-label": {
+        color: "#009be5",
+        fontSize: "small",
       },
     },
   }),
@@ -44,13 +55,40 @@ const columns = [
     width: 200,
     valueGetter: (params) => new Date(params.value).toJSON(),
   },
-  { field: "data", headerName: "Entry", flex: 1 },
+  {
+    field: "data",
+    headerName: "Entry",
+    flex: 1,
+    valueGetter: (params) => {
+      // check to see if the value is an object
+      if (typeof params.value === "object" && !Array.isArray(params.value)) {
+        return JSON.stringify(params.value, null, 2);
+      }
+      return params.value;
+    },
+  },
 ];
 
 const Console = (props) => {
   const { data, handleClearData } = props;
   const [openDialog, setOpenDialog] = useState(false);
   const [clickedRow, setClickedRow] = useState("");
+  const [colorized, setColorized] = useState(true);
+
+  const GridToolBarColorToggle = () => (
+    <FormGroup>
+      <FormControlLabel
+        control={
+          <Switch
+            checked={colorized}
+            onChange={(e) => setColorized(e.target.checked)}
+            size="small"
+          />
+        }
+        label="Colorize Rows"
+      />
+    </FormGroup>
+  );
 
   const GridToolBarClear = () => (
     <Button
@@ -68,10 +106,11 @@ const Console = (props) => {
       <GridToolbarFilterButton />
       <GridToolbarDensitySelector />
       <GridToolbarExport />
+      <GridToolBarColorToggle />
       <GridToolBarClear />
     </GridToolbarContainer>
   );
-  const classes = useStyles();
+  const classes = useStyles({ colorized });
 
   return (
     <>

@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "DevTools",
+  "name": "DevTools monitor when browser devtools are disabled",
   "icons": [
     {
       "src": "favicon.ico",
