@@ -194,6 +194,9 @@ function App() {
             case "console":
               consoleDispatch({ type: "ADD_LOG", payload });
               break;
+            case "windowError":
+              consoleDispatch({type: "ADD_LOG", payload});
+              break;
             case "heartbeat":
               consoleDispatch({ type: "HEARTBEAT", payload });
               break;
